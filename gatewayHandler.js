@@ -63,8 +63,6 @@ async function queryRobot(robot) {
 
 async function callRobotAPIMethod(robot, method, authorization) {
 
-    let payload;
-
     const apiMethodOptions = {
         url: `https://${robot.ipaddress}/${method.url}`,
         method: method.httpverb,
@@ -74,8 +72,9 @@ async function callRobotAPIMethod(robot, method, authorization) {
 
     try {
         console.log(`Making ${method.name} call to robot ${robot.name} at ${robot.ipaddress}.`);
-        payload = await request(apiMethodOptions);
-        console.log(JSON.stringify(payload));
+        const response = await request(apiMethodOptions);
+        console.log(JSON.stringify(response));
+        return response;
     }
     catch (ex) {
         throw new Error(`callRobotAPIMethod Error: ${ex.message}`);
