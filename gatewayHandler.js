@@ -67,7 +67,7 @@ async function queryRobot(robot) {
     for (let i = 0; i < robotMethods.length; i++) {
         let methodPayload;
         try {
-            let methodPayload = await queryRobot(callRobotAPIMethod(robot, robotMethods[i]), authorization);
+            let methodPayload = await callRobotAPIMethod(robot, robotMethods[i], authorization);
         }
         catch(error) {
             throw new Error(error)
