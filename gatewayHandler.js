@@ -57,7 +57,7 @@ async function queryRobot(robot) {
 
     // Loop through all robot methods in robotMethods.json
     for (let i = 0; i < robotMethods.length; i++) {
-        await queryRobot(callRobotAPIMethod(robot, robotMethods[i]), authorization);
+        await queryRobot(callRobotAPIMethod(robot, robotMethods[i]), auth);
     }
 }
 
