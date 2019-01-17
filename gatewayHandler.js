@@ -86,7 +86,7 @@ async function queryRobot(robot) {
 
 async function callRobotAPIMethod(robot, method, authorization) {
 
-    let url = new URL("https://" + robot.ipaddress + method.url);
+    let url = new URL("http://" + robot.ipaddress + method.url);
 
     const apiMethodOptions = {
         url: url.href,
