@@ -42,49 +42,73 @@ module.exports = async function () {
     // Loop through all robots in robots.json
     for (let i = 0; i < robots.length; i++) {
 
-        let responsePayload = await queryRobot(robots[i]);
-        var client = clientFromConnectionString(getDeviceIoTHubConnectionString(deviceId, deviceInfo.authentication.symmetricKey.primaryKey));
-    
-        await client.sendEvent(responsePayload);
+        await queryRobot(robots[i]);
+
     }
 }
 
 // queryRobot - Responsible for query to robot
 async function queryRobot(robot) {
 
+    let authorization;
+
     // Create Mir Robot authorization string
-    const authorization = await createAuthorization(robot.username, robot.password);
+    try {
+        authorization = createAuthorization(robot.username, robot.password);
+    }
+    catch(error)
+    {
+        throw new Error(error);
+    }
+
+    var client = clientFromConnectionString(robot.azureIoTHubDeviceConnectionString);
 
     // Loop through all robot methods in robotMethods.json
     for (let i = 0; i < robotMethods.length; i++) {
-        await queryRobot(callRobotAPIMethod(robot, robotMethods[i]), authorization);
+        let methodPayload;
+        try {
+            let methodPayload = await queryRobot(callRobotAPIMethod(robot, robotMethods[i]), authorization);
+        }
+        catch(error) {
+            throw new Error(error)
+        }
+
+        console.log(`methodPayload: ${methodPayload}`);
+        
+        try {
+            await client.sendEvent(methodPayload);
+        }
+        catch(error) {
+            throw new Error(error)
+        }
     }
 }
 
 async function callRobotAPIMethod(robot, method, authorization) {
 
+    let url = new URL("https://" + robot.ipaddress + method.url);
+
     const apiMethodOptions = {
-        url: `https://${robot.ipaddress}/${method.url}`,
+        url: url.href,
         method: method.httpverb,
         json: true,
         headers: { Authorization: `Basic ${authorization}` }
     };
 
     try {
-        console.log(`Making ${method.name} call to robot ${robot.name} at ${robot.ipaddress}.`);
-        const response = await request(apiMethodOptions);
-        console.log(JSON.stringify(response));
-        return response;
+        console.log(`Making ${method.name} call to ${robot.name} at ${url}.`);
+        return await request(apiMethodOptions);
     }
-    catch (ex) {
-        throw new Error(`callRobotAPIMethod Error: ${ex.message}`);
+    catch (error) {
+        console.log("here");
+        throw new Error (error);
     }
 
     return payload;
 }
 
 // Mir Robot authorization is a SHA-256 hash in Base 64
-async function createAuthorization(username, password) {
+function createAuthorization(username, password) {
 
     const sha256 = crypto.createHash('sha256').update(username.concat(":").concat(password)).digest("hex");
 
