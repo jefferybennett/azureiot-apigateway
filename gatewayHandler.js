@@ -75,7 +75,7 @@ async function callRobotAPIMethod(robot, method, authorization) {
         return await request(apiMethodOptions);
     }
     catch (ex) {
-        throw new Error("callRobotAPIMethod Error: ".concat(ex));
+        throw new Error(`callRobotAPIMethod Error: ${ex.message}`);
     }
 }
 
