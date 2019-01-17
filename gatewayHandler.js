@@ -86,6 +86,7 @@ async function queryRobot(robot) {
 
 async function callRobotAPIMethod(robot, method, authorization) {
 
+    let payload;
     let url = new URL("http://" + robot.ipaddress + method.url);
 
     const apiMethodOptions = {
@@ -97,7 +98,7 @@ async function callRobotAPIMethod(robot, method, authorization) {
 
     try {
         console.log(`Making ${method.name} call to ${robot.name} at ${url}.`);
-        return await request(apiMethodOptions);
+        payload = await request(apiMethodOptions);
     }
     catch (error) {
         console.log("here");
