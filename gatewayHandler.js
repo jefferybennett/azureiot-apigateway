@@ -67,7 +67,7 @@ async function callRobotAPIMethod(robot, method, authorization) {
         url: `https://${robot.ipaddress}/${method.url}`,
         method: method.httpverb,
         json: true,
-        headers: { Authorization: "Basic ".concat(authorization) }
+        headers: { Authorization: `Basic ${authorization}` }
     };
 
     try {
