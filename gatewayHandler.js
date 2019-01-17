@@ -53,11 +53,11 @@ module.exports = async function () {
 async function queryRobot(robot) {
 
     // Create Mir Robot authorization string
-    const auth = await createAuthorization(robot.username, robot.password);
+    const authorization = await createAuthorization(robot.username, robot.password);
 
     // Loop through all robot methods in robotMethods.json
     for (let i = 0; i < robotMethods.length; i++) {
-        await queryRobot(callRobotAPIMethod(robot, robotMethods[i]), auth);
+        await queryRobot(callRobotAPIMethod(robot, robotMethods[i]), authorization);
     }
 }
 
@@ -71,7 +71,7 @@ async function callRobotAPIMethod(robot, method, authorization) {
     };
 
     try {
-        context.log(`Making ${method.name} call to robot ${robot.name} at ${robot.ipaddress}.`);
+        console.log(`Making ${method.name} call to robot ${robot.name} at ${robot.ipaddress}.`);
         return await request(apiMethodOptions);
     }
     catch (ex) {
@@ -84,5 +84,12 @@ async function createAuthorization(username, password) {
 
     const sha256 = crypto.createHash('sha256').update(username.concat(":").concat(password)).digest("hex");
 
-    return Buffer.from(sha256).toString('base64');
+    let authorization = Buffer.from(sha256).toString('base64');
+
+    return authorization;
+}
+
+function GetEnvironmentVariable(name)
+{
+    return name + ": " + process.env[name];
 }

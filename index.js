@@ -29,7 +29,7 @@ const main = async function () {
         await gatewayHandler();
     }
     catch (ex) {
-        console.log("Exception in Gateway Handler: ".concat(ex.message));
+        console.log(`Exception in Gateway Handler: ${ex.message}`);
     }
 }
 
