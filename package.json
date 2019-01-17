@@ -17,8 +17,10 @@
   },
   "homepage": "https://github.com/jefferybennett/azureiot-apigateway#readme",
   "dependencies": {
-    "async": "^2.6.1",
     "azure-iot-device": "^1.8.2",
-    "azure-iothub": "^1.8.2"
+    "azure-iot-device-http": "^1.9.1",
+    "azure-iothub": "^1.8.2",
+    "dotenv": "^6.2.0",
+    "request-promise-native": "^1.0.5"
   }
 }

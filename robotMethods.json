@@ -1,0 +1,7 @@
+[
+    {
+        "name": "Get Status",
+        "url": "/status",
+        "httpverb": "GET"
+    }
+]

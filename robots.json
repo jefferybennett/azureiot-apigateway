@@ -1,0 +1,9 @@
+[
+    {
+        "name": "Robot X",
+        "ipaddress":"x",
+        "username": "admin",
+        "password": "admin",
+        "azureIoTHubDeviceConnectionString": "x"
+    }
+]
