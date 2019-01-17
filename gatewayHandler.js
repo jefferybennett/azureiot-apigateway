@@ -63,6 +63,8 @@ async function queryRobot(robot) {
 
 async function callRobotAPIMethod(robot, method, authorization) {
 
+    let payload;
+
     const apiMethodOptions = {
         url: `https://${robot.ipaddress}/${method.url}`,
         method: method.httpverb,
@@ -72,11 +74,14 @@ async function callRobotAPIMethod(robot, method, authorization) {
 
     try {
         console.log(`Making ${method.name} call to robot ${robot.name} at ${robot.ipaddress}.`);
-        return await request(apiMethodOptions);
+        payload = await request(apiMethodOptions);
+        console.log(JSON.stringify(payload));
     }
     catch (ex) {
         throw new Error(`callRobotAPIMethod Error: ${ex.message}`);
     }
+
+    return payload;
 }
 
 // Mir Robot authorization is a SHA-256 hash in Base 64
