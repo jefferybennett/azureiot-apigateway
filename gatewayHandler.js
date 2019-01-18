@@ -86,9 +86,14 @@ async function queryRobot(robot) {
         }
         
         try {
-            let message = new Message(JSON.stringify(methodPayload));
-            await client.sendEvent(message);
-            if (OutputLogs) console.log("Message sent to Azure IoT Hub");
+            if (typeof methodPayload === "undefined") {
+                if (OutputLogs) console.log("No payload returned from robot.  Message to IoT Hub will not be sent.");
+            }
+            else {
+                let message = new Message(JSON.stringify(methodPayload));
+                await client.sendEvent(message);
+                if (OutputLogs) console.log("Message sent to Azure IoT Hub");
+            }
         }
         catch(error) {
             console.log("Error sending event to IoT Hub: " + error.message)
