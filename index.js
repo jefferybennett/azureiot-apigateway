@@ -26,12 +26,15 @@ const gatewayHandler = require('./gatewayHandler');
 
 const main = async function () {
     try {
+        console.log("** API Gateway Started **");
         await gatewayHandler();
     }
     catch (ex) {
         const errorMessage = "Exception in Gateway Handler: " + ex.message;
         console.log(errorMessage);
     }
+
+    console.log("** API Gateway Stopped");
 }
 
 main();

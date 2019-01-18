@@ -29,23 +29,34 @@ if (result.error) {
 }
 
 const request = require('request-promise-native');
-const Device = require('azure-iot-device');
-const DeviceTransport = require('azure-iot-device-http');
-const clientFromConnectionString = require('azure-iot-device-http').clientFromConnectionString;
-const iotMessage = require("azure-iot-device").Message;
+const Client = require('azure-iot-device').Client;
+const Protocol = require('azure-iot-device-amqp').AmqpWs;
+const Message = require("azure-iot-device").Message;
 const crypto = require('crypto');
 const robots = require('./robots.json');
 const robotMethods = require('./robotMethods.json');
+const OutputLogs = (process.env.OutputLogs === 'true');
 
 module.exports = async function () {
 
+    const loopFrequency = parseInt(process.env.LoopFrequency);
+
     // Loop through all robots in robots.json
-    for (let i = 0; i < robots.length; i++) {
-
-        await queryRobot(robots[i]);
-
+    while(true) {
+        for (let robot of robots) {
+            await queryRobot(robot);
+            await delay(loopFrequency);
+        }
     }
 }
+
+function delay(t, val) {
+    return new Promise(function(resolve) {
+        setTimeout(function() {
+            resolve(val);
+        }, t);
+    });
+ }
 
 // queryRobot - Responsible for query to robot
 async function queryRobot(robot) {
@@ -58,36 +69,40 @@ async function queryRobot(robot) {
     }
     catch(error)
     {
-        throw new Error(error);
+        console.log("Error creating authorization for Mir Robot: " + error.message)
     }
 
-    var client = clientFromConnectionString(robot.azureIoTHubDeviceConnectionString);
+    // Create Azure IoT Hub Device Client
+    const client = Client.fromConnectionString(robot.azureIoTHubDeviceConnectionString, Protocol);
 
     // Loop through all robot methods in robotMethods.json
     for (let i = 0; i < robotMethods.length; i++) {
         let methodPayload;
         try {
-            let methodPayload = await callRobotAPIMethod(robot, robotMethods[i], authorization);
+            methodPayload = await callRobotAPIMethod(robot, robotMethods[i], authorization);
         }
         catch(error) {
             throw new Error(error)
         }
-
-        console.log(`methodPayload: ${methodPayload}`);
         
         try {
-            await client.sendEvent(methodPayload);
+            let message = new Message(JSON.stringify(methodPayload));
+            await client.sendEvent(message);
+            if (OutputLogs) console.log("Message sent to Azure IoT Hub");
         }
         catch(error) {
-            throw new Error(error)
+            console.log("Error sending event to IoT Hub: " + error.message)
         }
     }
+
+    return;
 }
 
 async function callRobotAPIMethod(robot, method, authorization) {
 
     let payload;
     let url = new URL("http://" + robot.ipaddress + method.url);
+    //let url = new URL("http://jsonplaceholder.typicode.com/posts")
 
     const apiMethodOptions = {
         url: url.href,
@@ -97,15 +112,14 @@ async function callRobotAPIMethod(robot, method, authorization) {
     };
 
     try {
-        console.log(`Making ${method.name} call to ${robot.name} at ${url}.`);
+        if (OutputLogs) console.log(`Making ${method.name} call to ${robot.name} at ${url}.`);
         payload = await request(apiMethodOptions);
+        return payload;
     }
     catch (error) {
-        console.log("here");
-        throw new Error (error);
+        console.log("Exception calling robot API method: " + error.Message);
     }
 
-    return payload;
 }
 
 // Mir Robot authorization is a SHA-256 hash in Base 64
@@ -116,9 +130,4 @@ function createAuthorization(username, password) {
     let authorization = Buffer.from(sha256).toString('base64');
 
     return authorization;
-}
-
-function GetEnvironmentVariable(name)
-{
-    return name + ": " + process.env[name];
 }
